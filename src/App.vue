@@ -1,22 +1,33 @@
 <template>
   <div id="app">
     <div>
-      x:{{ x }} <button @click="x += 10">+</button><button @click="x -= 10">-</button>
+      x:{{ x }}
+      <button @click="x += 10">+</button>
+      <button @click="x -= 10">-</button>
     </div>
     <div>
-      y:{{ y }}<button @click="y += 10">+</button><button @click="y -= 10">-</button>
+      y:{{ y }}
+      <button @click="y += 10">+</button>
+      <button @click="y -= 10">-</button>
     </div>
     <div>
-      w:{{ w }}<button @click="w += 10">+</button><button @click="w -= 10">-</button>
+      w:{{ w }}
+      <button @click="w += 10">+</button>
+      <button @click="w -= 10">-</button>
     </div>
     <div>
-      h: {{ h }}<button @click="h += 10">+</button><button @click="h -= 10">-</button>
+      h: {{ h }}
+      <button @click="h += 10">+</button>
+      <button @click="h -= 10">-</button>
     </div>
-    <div>active:{{ active }}<br /></div>
+    <div>
+      active:{{ active }}
+      <br />
+    </div>
     <div class="parent">
       <Vue3DraggableResizable
-        :initW="40"
-        :initH="80"
+        :initW="300"
+        :initH="250"
         v-model:x="x"
         v-model:y="y"
         v-model:w="w"
@@ -30,6 +41,8 @@
         :disabledH="false"
         :disabledY="false"
         :lockAspectRatio="true"
+        :minW="200"
+        :minH="50"
         classNameHandle="my-handle"
         @activated="print('activated')"
         @deactivated="print('deactivated')"
@@ -40,42 +53,77 @@
         @drag-end="print('drag-end', $event)"
         @resize-end="print('resize-end', $event)"
       >
+        <template #header style="background: #f00;">header</template>
         This is a test example
+      </Vue3DraggableResizable>
+
+      <Vue3DraggableResizable
+        :initW="300"
+        :initH="250"
+        v-model:x="x"
+        v-model:y="y"
+        v-model:w="w"
+        v-model:h="h"
+        :active="true"
+        :draggable="true"
+        :resizable="true"
+        :parent="true"
+        :disabledX="false"
+        :disabledW="false"
+        :disabledH="false"
+        :disabledY="false"
+        :lockAspectRatio="true"
+        :minW="200"
+        :minH="50"
+        classNameHandle="my-handle"
+        @activated="print('activated')"
+        @deactivated="print('deactivated')"
+        @drag-start="print('drag-start', $event)"
+        @resize-start="print('resize-start', $event)"
+        @dragging="print('dragging', $event)"
+        @resizing="print('resizing', $event)"
+        @drag-end="print('drag-end', $event)"
+        @resize-end="print('resize-end', $event)"
+      >
+        <template #header style="background: #f00;">header</template>
+        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eaque in minus
+        nostrum possimus at debitis totam! Soluta, id! Nobis a magnam veniam ad
+        voluptate fuga numquam distinctio? Cumque, officia eaque!
       </Vue3DraggableResizable>
     </div>
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-import Vue3DraggableResizable from "./components/Vue3DraggableResizable";
-import DraggableContainer from "./components/DraggableContainer";
+<script lang="ts">
+import { defineComponent } from 'vue'
+import Vue3DraggableResizable from './components/Vue3DraggableResizable'
+import DraggableContainer from './components/DraggableContainer'
 
 export default defineComponent({
   components: { DraggableContainer, Vue3DraggableResizable },
   data() {
     return {
-      x: 100,
-      y: 100,
-      h: 100,
-      w: 100,
+      x: 10,
+      y: 10,
+      h: 250,
+      w: 300,
       active: false,
       draggable: true,
-      resizable: true,
-    };
+      resizable: true
+    }
   },
   mounted() {},
   methods: {
-    print(val, e) {
+    print(val: any, e: any) {
       // console.log(val, e)
-    },
-  },
-});
+    }
+  }
+})
 </script>
 <style lang="less" scoped>
 .parent {
-  width: 300px;
-  height: 300px;
+  width: 800px;
+  height: 800px;
   // position: absolute;
   // top: 100px;
   // left: 200px;

@@ -3,63 +3,94 @@
   border: 1px solid transparent;
   box-sizing: border-box;
 }
-.vdr-container.active {
+
+/* .vdr-container.active {
   border-color: #000;
   border-style: dashed;
-}
+} */
+
 .vdr-container.dragging {
   border-color: #000;
   border-style: solid;
 }
+
 .vdr-handle {
   box-sizing: border-box;
   position: absolute;
-  width: 7px;
-  height: 7px;
   background: #f0f0f0;
   border: 1px solid #333;
+  opacity: 0;
 }
+
 .vdr-handle-tl {
-  top: -4px;
+  top: -6px;
   left: -4px;
+  width: 8px;
+  height: 8px;
   cursor: nw-resize;
 }
+
 .vdr-handle-tm {
-  top: -4px;
-  left: 50%;
-  margin-left: -3px;
+  top: -6px;
+  left: 4px;
+  right: 4px;
   cursor: n-resize;
+  height: 8px;
 }
+
 .vdr-handle-tr {
-  top: -4px;
+  top: -6px;
   right: -4px;
+  width: 8px;
+  height: 8px;
   cursor: ne-resize;
 }
+
 .vdr-handle-ml {
   top: 50%;
-  margin-top: -3px;
   left: -4px;
+  width: 6px;
+  top: 2px;
+  bottom: 4px;
   cursor: w-resize;
 }
+
 .vdr-handle-mr {
-  top: 50%;
-  margin-top: -3px;
+  top: 2px;
+  bottom: 4px;
+  width: 6px;
   right: -4px;
   cursor: e-resize;
 }
+
 .vdr-handle-bl {
+  width: 8px;
+  height: 8px;
   bottom: -4px;
   left: -4px;
   cursor: sw-resize;
 }
+
 .vdr-handle-bm {
   bottom: -4px;
   left: 50%;
-  margin-left: -4px;
+  height: 8px;
+  left: 4px;
+  right: 4px;
   cursor: s-resize;
 }
+
 .vdr-handle-br {
   bottom: -4px;
   right: -4px;
+  width: 8px;
+  height: 8px;
   cursor: se-resize;
+}
+
+.vdr-header {
+  background-color: #dedede;
+  height: 2em;
+  line-height: 2em;
+  cursor: move;
 }

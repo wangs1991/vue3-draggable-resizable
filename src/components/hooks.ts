@@ -234,15 +234,46 @@ function getPosition(e: HandleEvent) {
   }
 }
 
+function isContainedElem(
+  container: HTMLElement,
+  elem: EventTarget,
+  root: HTMLElement | null | undefined
+) {
+  if (container === elem) {
+    return true // 本身元素
+  }
+  root = root || document.body // 默认把根节点放到body
+  if (elem === root) {
+    return false
+  }
+  let element = (<HTMLInputElement>elem).parentNode
+  let isHit = false
+
+  while (element && element !== root) {
+    console.log(element)
+    if (element === container) {
+      isHit = true
+      break
+    }
+    element = element.parentNode
+  }
+  return isHit
+}
+
 export function initDraggableContainer(
   containerRef: Ref<HTMLElement | undefined>,
   containerProps: ReturnType<typeof initState>,
   limitProps: ReturnType<typeof initLimitSizeAndMethods>,
   draggable: Ref<boolean>,
+  headerRef: Ref<HTMLElement | undefined>,
+  onlyHeaderDrag: Ref<boolean>,
   emit: any,
   containerProvider: ContainerProvider | null,
   parentSize: ReturnType<typeof initParent>
 ) {
+  console.log('onlyHeaderDrag: ' + onlyHeaderDrag.value)
+  console.log(containerRef)
+  console.log(headerRef)
   const { left: x, top: y, width: w, height: h, dragging, id } = containerProps
   const {
     setDragging,
@@ -344,6 +375,19 @@ export function initDraggableContainer(
   }
   const handleDown = (e: HandleEvent) => {
     if (!draggable.value) return
+    setEnable(true)
+    // 如果是仅头部可以拖拽移动，需要做判断阻止区域外的操作
+    if (
+      onlyHeaderDrag.value &&
+      !(
+        e.target &&
+        headerRef.value &&
+        isContainedElem(headerRef.value, e.target, containerRef.value)
+      )
+    ) {
+      console.log('操作的不是header')
+      return
+    }
     setDragging(true)
     lstX = x.value
     lstY = y.value
@@ -368,6 +412,7 @@ export function initDraggableContainer(
     }
   })
   onMounted(() => {
+    console.log(headerRef.value)
     const el = containerRef.value
     if (!el) return
     el.style.left = x + 'px'
@@ -386,7 +431,7 @@ export function initDraggableContainer(
     removeEvent(documentElement, UP_HANDLES, handleUp)
     removeEvent(documentElement, MOVE_HANDLES, handleDrag)
   })
-  return { containerRef }
+  return { containerRef, headerRef }
 }
 
 export function initResizeHandle(
@@ -424,33 +469,61 @@ export function initResizeHandle(
     let deltaY = _pageY - lstPageY
     let _deltaX = deltaX
     let _deltaY = deltaY
-    if (props.lockAspectRatio) {
-      deltaX = Math.abs(deltaX)
-      deltaY = deltaX * tmpAspectRatio
-      if (idx0 === 't') {
-        if (_deltaX < 0 || (idx1 === 'm' && _deltaY < 0)) {
-          deltaX = -deltaX
-          deltaY = -deltaY
-        }
-      } else {
-        if (_deltaX < 0 || (idx1 === 'm' && _deltaY < 0)) {
-          deltaX = -deltaX
-          deltaY = -deltaY
-        }
-      }
+
+    // if (props.lockAspectRatio) {
+    //   deltaX = Math.abs(deltaX)
+    //   deltaY = deltaX * tmpAspectRatio
+    //   if (idx0 === 't') {
+    //     if (_deltaX < 0 || (idx1 === 'm' && _deltaY < 0)) {
+    //       deltaX = -deltaX
+    //       deltaY = -deltaY
+    //     }
+    //   } else {
+    //     if (_deltaX < 0 || (idx1 === 'm' && _deltaY < 0)) {
+    //       deltaX = -deltaX
+    //       deltaY = -deltaY
+    //     }
+    //   }
+    // }
+
+    const dir = idx0 + idx1
+    switch (dir) {
+      case 'tl':
+        setTop(lstY - (height.value - lstH))
+        setLeft(lstX - (width.value - lstW))
+        setHeight(lstH - deltaY)
+        setWidth(lstW - deltaX)
+        break
+      case 'tm':
+        setTop(lstY - (height.value - lstH))
+        setHeight(lstH - deltaY)
+        break
+      case 'tr':
+        setTop(lstY - (height.value - lstH))
+        setHeight(lstH - deltaY)
+        setWidth(lstW + deltaX)
+        break
+      case 'mr':
+        setWidth(lstW + deltaX)
+        break
+      case 'br':
+        setHeight(lstH + deltaY)
+        setWidth(lstW + deltaX)
+        break
+      case 'bm':
+        setHeight(lstH + deltaY)
+        break
+      case 'bl':
+        setHeight(lstH + deltaY)
+        setWidth(lstW - deltaX)
+        setLeft(lstX - (width.value - lstW))
+        break
+      case 'ml':
+        setLeft(lstX - (width.value - lstW))
+        setWidth(lstW - deltaX)
+        break
     }
-    if (idx0 === 't') {
-      setHeight(lstH - deltaY)
-      setTop(lstY - (height.value - lstH))
-    } else if (idx0 === 'b') {
-      setHeight(lstH + deltaY)
-    }
-    if (idx1 === 'l') {
-      setWidth(lstW - deltaX)
-      setLeft(lstX - (width.value - lstW))
-    } else if (idx1 === 'r') {
-      setWidth(lstW + deltaX)
-    }
+
     emit('resizing', {
       x: left.value,
       y: top.value,
@@ -478,20 +551,13 @@ export function initResizeHandle(
   }
   const resizeHandleDown = (e: HandleEvent, handleType: ResizingHandle) => {
     if (!props.resizable) return
+    console.log(e)
     e.stopPropagation()
     setResizingHandle(handleType)
     setResizing(true)
     idx0 = handleType[0]
     idx1 = handleType[1]
-    if (aspectRatio.value) {
-      if (['tl', 'tm', 'ml', 'bl'].includes(handleType)) {
-        idx0 = 't'
-        idx1 = 'l'
-      } else {
-        idx0 = 'b'
-        idx1 = 'r'
-      }
-    }
+
     let minHeight = props.minH as number
     let minWidth = props.minW as number
     if (minHeight / minWidth > aspectRatio.value) {
@@ -506,13 +572,13 @@ export function initResizeHandle(
         idx0 === 't' ? top.value + height.value : parentHeight.value - top.value
       let maxWidth =
         idx1 === 'l' ? left.value + width.value : parentWidth.value - left.value
-      if (props.lockAspectRatio) {
-        if (maxHeight / maxWidth < aspectRatio.value) {
-          maxWidth = maxHeight / aspectRatio.value
-        } else {
-          maxHeight = maxWidth * aspectRatio.value
-        }
-      }
+      // if (props.lockAspectRatio) {
+      //   if (maxHeight / maxWidth < aspectRatio.value) {
+      //     maxWidth = maxHeight / aspectRatio.value
+      //   } else {
+      //     maxHeight = maxWidth * aspectRatio.value
+      //   }
+      // }
       setResizingMaxHeight(maxHeight)
       setResizingMaxWidth(maxWidth)
     }

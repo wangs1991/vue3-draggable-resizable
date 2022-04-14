@@ -87,7 +87,7 @@ const VdrProps = {
   },
   active: {
     type: Boolean,
-    default: false
+    default: true
   },
   parent: {
     type: Boolean,
@@ -124,9 +124,13 @@ const VdrProps = {
     type: String,
     default: 'handle'
   },
-  lockAspectRatio: {
+  // lockAspectRatio: {
+  //   type: Boolean,
+  //   default: false
+  // },
+  onlyHeaderDrag: {
     type: Boolean,
-    default: false
+    default: true
   }
 }
 
@@ -151,7 +155,7 @@ const VueDraggableResizable = defineComponent({
   props: VdrProps,
   emits: emits,
   setup(props, { emit }) {
-    const containerProps = initState(props, emit)
+    const containerProps = initState(props, emit) // 获取props的更新的方法
     const provideIdentity = inject('identity')
     let containerProvider: ContainerProvider | null = null
     if (provideIdentity === IDENTITY) {
@@ -166,6 +170,7 @@ const VueDraggableResizable = defineComponent({
       }
     }
     const containerRef = ref<HTMLElement>()
+    const headerRef = ref<HTMLElement>()
     const parentSize = initParent(containerRef)
     const limitProps = initLimitSizeAndMethods(
       props,
@@ -177,6 +182,8 @@ const VueDraggableResizable = defineComponent({
       containerProps,
       limitProps,
       toRef(props, 'draggable'),
+      headerRef,
+      toRef(props, 'onlyHeaderDrag'),
       emit,
       containerProvider,
       parentSize
@@ -189,7 +196,10 @@ const VueDraggableResizable = defineComponent({
       emit
     )
     watchProps(props, limitProps)
+
+    // 暴露变量
     return {
+      headerRef,
       containerRef,
       containerProvider,
       ...containerProps,
@@ -237,10 +247,23 @@ const VueDraggableResizable = defineComponent({
       'div',
       {
         ref: 'containerRef',
-        class: ['vdr-container', this.klass],
+        class: [
+          'vdr-container',
+          this.klass,
+          this.onlyHeaderDrag && 'is-only-header-drag'
+        ],
         style: this.style
       },
       [
+        this.$slots.header &&
+          h(
+            'div',
+            {
+              ref: 'headerRef',
+              class: ['vdr-header']
+            },
+            this.$slots.header()
+          ),
         this.$slots.default && this.$slots.default(),
         ...this.handlesFiltered.map((item) =>
           h('div', {
@@ -250,7 +273,7 @@ const VueDraggableResizable = defineComponent({
               this.classNameHandle,
               `${this.classNameHandle}-${item}`
             ],
-            style: { display: this.enable ? 'block' : 'none' },
+            // style: { display: this.enable ? 'block' : 'none' },
             onMousedown: (e: MouseEvent) =>
               this.resizeHandleDown(e, <ResizingHandle>item),
             onTouchstart: (e: TouchEvent) =>
