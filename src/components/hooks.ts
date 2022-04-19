@@ -1,4 +1,4 @@
-import { onMounted, onUnmounted, ref, watch, Ref, computed } from 'vue'
+import { onMounted, onUnmounted, ref, watch, Ref, computed, onBeforeMount } from 'vue'
 import {
   getElSize,
   filterHandles,
@@ -106,12 +106,19 @@ export function initState(props: any, emit: any) {
 export function initParent(containerRef: Ref<HTMLElement | undefined>) {
   const parentWidth = ref(0)
   const parentHeight = ref(0)
-  onMounted(() => {
+  const getSize = () => {
     if (containerRef.value && containerRef.value.parentElement) {
       const { width, height } = getElSize(containerRef.value.parentElement)
       parentWidth.value = width
       parentHeight.value = height
     }
+  }
+  onBeforeMount(() => {
+    window.removeEventListener('resize', getSize)
+  })
+  onMounted(() => {
+    getSize()
+    window.addEventListener('resize', getSize)
   })
   return {
     parentWidth,
