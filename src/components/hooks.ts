@@ -96,8 +96,8 @@ export function initState(props: any, emit: any) {
     setResizingMaxWidth,
     setResizingMinWidth,
     setResizingMinHeight,
-    setWidth: (val: number) => setWidth(Math.floor(val)),
-    setHeight: (val: number) => setHeight(Math.floor(val)),
+    setWidth: (val: number) => setWidth(Math.max(Math.floor(val), resizingMinWidth.value)),
+    setHeight: (val: number) => setHeight(Math.max(Math.floor(val), resizingMinHeight.value)),
     setTop: (val: number) => setTop(Math.floor(val)),
     setLeft: (val: number) => setLeft(Math.floor(val))
   }
@@ -250,7 +250,6 @@ function isContainedElem(
   let isHit = false
 
   while (element && element !== root) {
-    console.log(element)
     if (element === container) {
       isHit = true
       break
@@ -271,9 +270,6 @@ export function initDraggableContainer(
   containerProvider: ContainerProvider | null,
   parentSize: ReturnType<typeof initParent>
 ) {
-  console.log('onlyHeaderDrag: ' + onlyHeaderDrag.value)
-  console.log(containerRef)
-  console.log(headerRef)
   const { left: x, top: y, width: w, height: h, dragging, id } = containerProps
   const {
     setDragging,
@@ -385,7 +381,6 @@ export function initDraggableContainer(
         isContainedElem(headerRef.value, e.target, containerRef.value)
       )
     ) {
-      console.log('操作的不是header')
       return
     }
     setDragging(true)
@@ -412,7 +407,6 @@ export function initDraggableContainer(
     }
   })
   onMounted(() => {
-    console.log(headerRef.value)
     const el = containerRef.value
     if (!el) return
     el.style.left = x + 'px'
@@ -551,7 +545,6 @@ export function initResizeHandle(
   }
   const resizeHandleDown = (e: HandleEvent, handleType: ResizingHandle) => {
     if (!props.resizable) return
-    console.log(e)
     e.stopPropagation()
     setResizingHandle(handleType)
     setResizing(true)

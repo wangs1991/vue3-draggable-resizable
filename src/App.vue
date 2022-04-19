@@ -55,41 +55,9 @@
       >
         <template #header style="background: #f00;">header</template>
         This is a test example
+        <button @click="test">内部事件</button>
       </Vue3DraggableResizable>
 
-      <Vue3DraggableResizable
-        :initW="300"
-        :initH="250"
-        v-model:x="x"
-        v-model:y="y"
-        v-model:w="w"
-        v-model:h="h"
-        :active="true"
-        :draggable="true"
-        :resizable="true"
-        :parent="true"
-        :disabledX="false"
-        :disabledW="false"
-        :disabledH="false"
-        :disabledY="false"
-        :lockAspectRatio="true"
-        :minW="200"
-        :minH="50"
-        classNameHandle="my-handle"
-        @activated="print('activated')"
-        @deactivated="print('deactivated')"
-        @drag-start="print('drag-start', $event)"
-        @resize-start="print('resize-start', $event)"
-        @dragging="print('dragging', $event)"
-        @resizing="print('resizing', $event)"
-        @drag-end="print('drag-end', $event)"
-        @resize-end="print('resize-end', $event)"
-      >
-        <template #header style="background: #f00;">header</template>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eaque in minus
-        nostrum possimus at debitis totam! Soluta, id! Nobis a magnam veniam ad
-        voluptate fuga numquam distinctio? Cumque, officia eaque!
-      </Vue3DraggableResizable>
     </div>
   </div>
 </template>
@@ -112,10 +80,17 @@ export default defineComponent({
       resizable: true
     }
   },
-  mounted() {},
+  mounted() {
+    setTimeout(() => {
+      this.w = 50
+    }, 3000)
+  },
   methods: {
     print(val: any, e: any) {
       // console.log(val, e)
+    },
+    test() {
+      alert()
     }
   }
 })
